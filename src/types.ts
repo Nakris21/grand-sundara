@@ -19,11 +19,30 @@ export type FamilyRelationship =
 
 export interface UserAccount {
   id: string;
-  email: string;
+  username: string;
+  authEmail: string;
+  email?: string;
   fullName: string;
   role: UserRole;
+  familyId?: string;
   residentId?: string;
   accountStatus: AccountStatus;
+  forcePasswordChange: boolean;
+  whatsappStatus?: 'Belum disiapkan' | 'Pesan disiapkan' | 'Dikonfirmasi Admin';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AccountTransferRequest {
+  id: string;
+  familyId: string;
+  currentUserId?: string;
+  currentResidentId?: string;
+  newResidentId: string;
+  reason: string;
+  status: 'pending' | 'approved' | 'rejected';
+  requestedBy: string;
+  decidedBy?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -88,7 +107,7 @@ export interface BusinessListing {
   description?: string;
   whatsappNumber?: string;
   socialUrl?: string;
-  status: 'pending' | 'approved' | 'rejected' | 'inactive';
+  status: 'pending' | 'approved' | 'rejected' | 'inactive' | 'published' | 'pending_review' | 'archived';
   createdAt: string;
   updatedAt: string;
 }

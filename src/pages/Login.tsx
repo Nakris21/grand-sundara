@@ -4,43 +4,30 @@
  */
 
 import React, { useState } from 'react';
-import { UserRole, UserAccount } from '../types';
-import { MOCK_USERS } from '../data/mockData';
-import { Shield, Lock, Mail, ArrowRight, HeartHandshake, CheckCircle2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { UserRole } from '../types';
+import { Lock, User, ArrowRight, HeartHandshake, CheckCircle2, AlertCircle, Loader2, ShieldCheck } from 'lucide-react';
 
-interface LoginProps {
-  onLogin: (user: UserAccount) => void;
-}
-
-export const Login: React.FC<LoginProps> = ({ onLogin }) => {
-  const [email, setEmail] = useState('pengurus@grandsundara.id');
-  const [selectedRole, setSelectedRole] = useState<UserRole>('admin');
-  const [error, setError] = useState('');
+export const Login: React.FC = () => {
+  const { login, switchDemoRole, isLoading, error, clearError } = useAuth();
+  const [username, setUsername] = useState('admin_fauzi');
+  const [password, setPassword] = useState('password123');
 
   const handleRoleQuickLogin = (role: UserRole) => {
-    const user = MOCK_USERS.find((u) => u.role === role);
-    if (user) {
-      onLogin(user);
-    }
+    switchDemoRole(role);
+    if (role === 'super_admin') setUsername('superadmin');
+    else if (role === 'admin') setUsername('admin_fauzi');
+    else if (role === 'bendahara') setUsername('bendahara_siti');
+    else if (role === 'resident') setUsername('warga_c12');
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const found = MOCK_USERS.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (found) {
-      onLogin(found);
-    } else {
-      // Create temporary session based on selected role
-      const tempUser: UserAccount = {
-        id: 'usr_custom_' + Date.now(),
-        email: email,
-        fullName: email.split('@')[0],
-        role: selectedRole,
-        accountStatus: 'active',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      onLogin(tempUser);
+    clearError();
+    try {
+      await login(username, password);
+    } catch (err) {
+      // Error handled in AuthContext
     }
   };
 
@@ -63,10 +50,17 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
         </div>
 
         <div className="p-6 sm:p-8 space-y-6">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-xs flex items-center space-x-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
           <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-xs text-emerald-900 space-y-2">
             <p className="font-semibold flex items-center space-x-1 text-emerald-950">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Pilih Peran Demo untuk Pengujian Cepat:</span>
+              <span>Pilih Peran untuk Uji Cepat:</span>
             </p>
             <div className="grid grid-cols-2 gap-2 pt-1">
               <button
@@ -74,85 +68,92 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 onClick={() => handleRoleQuickLogin('super_admin')}
                 className="text-left bg-white hover:bg-emerald-100 border border-emerald-300 rounded-lg p-2 transition-colors"
               >
-                <div className="font-bold text-emerald-900">Super Admin</div>
-                <div className="text-[10px] text-gray-600">Akses penuh sistem</div>
+                <div className="font-bold text-emerald-900 text-xs">Super Admin</div>
+                <div className="text-[10px] text-gray-600">username: superadmin</div>
               </button>
               <button
                 type="button"
                 onClick={() => handleRoleQuickLogin('admin')}
                 className="text-left bg-white hover:bg-emerald-100 border border-emerald-300 rounded-lg p-2 transition-colors"
               >
-                <div className="font-bold text-emerald-900">Admin Paguyuban</div>
-                <div className="text-[10px] text-gray-600">Kelola warga & kegiatan</div>
+                <div className="font-bold text-emerald-900 text-xs">Admin Paguyuban</div>
+                <div className="text-[10px] text-gray-600">username: admin_fauzi</div>
               </button>
               <button
                 type="button"
                 onClick={() => handleRoleQuickLogin('bendahara')}
                 className="text-left bg-white hover:bg-emerald-100 border border-emerald-300 rounded-lg p-2 transition-colors"
               >
-                <div className="font-bold text-emerald-900">Bendahara</div>
-                <div className="text-[10px] text-gray-600">Pencatatan kas</div>
+                <div className="font-bold text-emerald-900 text-xs">Bendahara</div>
+                <div className="text-[10px] text-gray-600">username: bendahara_siti</div>
               </button>
               <button
                 type="button"
                 onClick={() => handleRoleQuickLogin('resident')}
                 className="text-left bg-white hover:bg-emerald-100 border border-emerald-300 rounded-lg p-2 transition-colors"
               >
-                <div className="font-bold text-emerald-900">Warga</div>
-                <div className="text-[10px] text-gray-600">Lihat kas, info & direktori</div>
+                <div className="font-bold text-emerald-900 text-xs">Warga</div>
+                <div className="text-[10px] text-gray-600">username: warga_c12</div>
               </button>
             </div>
           </div>
 
-          <div className="relative flex py-2 items-center">
-            <div className="grow border-t border-gray-200"></div>
-            <span className="shrink mx-4 text-xs text-gray-400 uppercase tracking-wider">Atau masuk manual</span>
-            <div className="grow border-t border-gray-200"></div>
-          </div>
-
           <form onSubmit={handleFormSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1">Email Warga / Pengurus</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Username Akun</label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                  <Mail className="w-4 h-4" />
+                  <User className="w-4 h-4" />
                 </span>
                 <input
-                  type="email"
+                  type="text"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
-                  placeholder="nama@email.com"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium"
+                  placeholder="Masukkan username"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1">Pilih Peran Akun</label>
-              <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value as UserRole)}
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
-              >
-                <option value="super_admin">Super Admin</option>
-                <option value="admin">Admin Paguyuban</option>
-                <option value="bendahara">Bendahara</option>
-                <option value="resident">Warga Terverifikasi</option>
-              </select>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Password</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                  <Lock className="w-4 h-4" />
+                </span>
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+                  placeholder="••••••••"
+                />
+              </div>
             </div>
 
             <button
               type="submit"
-              className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md transition-all text-sm"
+              disabled={isLoading}
+              className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md transition-all text-sm disabled:opacity-50"
             >
-              <span>Masuk ke Portal</span>
-              <ArrowRight className="w-4 h-4" />
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Memproses Masuk...</span>
+                </>
+              ) : (
+                <>
+                  <span>Masuk Portal Warga</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </form>
 
           <p className="text-center text-xs text-gray-400">
-            Integrasi Firebase Auth & Firestore disiapkan untuk tahap berikutnya.
+            Autentikasi berbasis Username & Password aman terintegrasi dengan Firebase Auth.
           </p>
         </div>
       </div>

@@ -1,0 +1,116 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for authentication & role checks
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/user_accounts/$(request.auth.uid)).data;
+    }
+
+    function isUserActive() {
+      return isAuthenticated() && 
+        resource.id == request.auth.uid &&
+        getUserData().account_status == 'active';
+    }
+
+    function hasRole(roleName) {
+      return isAuthenticated() && getUserData().role == roleName;
+    }
+
+    function isSuperAdmin() {
+      return hasRole('super_admin');
+    }
+
+    function isAdmin() {
+      return hasRole('admin') || isSuperAdmin();
+    }
+
+    function isTreasurer() {
+      return hasRole('bendahara') || isAdmin();
+    }
+
+    function isVerifiedResident() {
+      return isAuthenticated() && getUserData().account_status == 'active';
+    }
+
+    // 1. User Accounts Collection
+    match /user_accounts/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      // Users cannot change their own role or account_status
+      allow create: if isSuperAdmin();
+      allow update: if isSuperAdmin() || (request.auth.uid == userId && 
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'account_status', 'resident_id']));
+      allow delete: if isSuperAdmin();
+    }
+
+    // 2. Invitations Collection
+    match /invitations/{invitationId} {
+      allow read, write: if isAdmin();
+    }
+
+    // 3. Audit Logs Collection
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      // Audit logs can be created by authenticated actors but never updated or deleted by residents
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+
+    // 4. Families & Residents
+    match /families/{familyId} {
+      allow read: if isVerifiedResident();
+      allow write: if isAdmin();
+    }
+
+    match /residents/{residentId} {
+      allow read: if isVerifiedResident();
+      // Residents can update their own profile fields except verification status
+      allow update: if isVerifiedResident() && (
+        isAdmin() || resource.data.linked_user_id == request.auth.uid
+      );
+      allow create, delete: if isAdmin();
+    }
+
+    // 5. Cash Transactions
+    match /cash_transactions/{trxId} {
+      allow read: if isVerifiedResident();
+      allow write: if isTreasurer();
+    }
+
+    match /cash_settings/{settingId} {
+      allow read: if isVerifiedResident();
+      allow write: if isTreasurer();
+    }
+
+    // 6. Business Listings
+    match /business_listings/{listingId} {
+      allow read: if isVerifiedResident();
+      allow create: if isVerifiedResident();
+      // Owner or admin can update
+      allow update: if isVerifiedResident() && (
+        isAdmin() || resource.data.owner_resident_id == getUserData().resident_id
+      );
+      allow delete: if isAdmin();
+    }
+
+    // 7. Announcements & Events
+    match /announcements/{annId} {
+      allow read: if isVerifiedResident();
+      allow write: if isAdmin();
+    }
+
+    match /events/{eventId} {
+      allow read: if isVerifiedResident();
+      allow write: if isAdmin();
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

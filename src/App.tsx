@@ -4,14 +4,15 @@
  */
 
 import React, { useState } from 'react';
-import { ActivePage, UserAccount, UserRole } from './types';
-import { MOCK_USERS } from './data/mockData';
+import { ActivePage, UserRole } from './types';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { Footer } from './components/Footer';
 
 // Pages
 import { Login } from './pages/Login';
+import { AccountStatusNotice } from './pages/AccountStatusNotice';
 import { Dashboard } from './pages/Dashboard';
 import { FamilyResidents } from './pages/FamilyResidents';
 import { Siteplan } from './pages/Siteplan';
@@ -20,48 +21,41 @@ import { BusinessDirectory } from './pages/BusinessDirectory';
 import { AnnouncementsEvents } from './pages/AnnouncementsEvents';
 import { AccountSettings } from './pages/AccountSettings';
 import { AuditLogPage } from './pages/AuditLogPage';
+import { ChangePasswordModal } from './components/ChangePasswordModal';
 
-export default function App() {
-  const [currentUser, setCurrentUser] = useState<UserAccount | null>(MOCK_USERS[1]); // Default to admin for evaluation
+function AppContent() {
+  const { currentUser, logout, switchDemoRole, isLoading } = useAuth();
   const [activePage, setActivePage] = useState<ActivePage>('dashboard');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  const handleLogin = (user: UserAccount) => {
-    setCurrentUser(user);
-    setActivePage('dashboard');
-  };
-
-  const handleLogout = () => {
-    setCurrentUser(null);
-  };
-
-  const handleSwitchUserRole = (role: UserRole) => {
-    const found = MOCK_USERS.find((u) => u.role === role);
-    if (found) {
-      setCurrentUser(found);
-    } else {
-      setCurrentUser({
-        id: 'usr_custom_' + Date.now(),
-        email: `${role}@grandsundara.id`,
-        fullName: `Pengguna ${role}`,
-        role: role,
-        accountStatus: 'active',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-emerald-900 flex items-center justify-center text-white text-sm font-medium">
+        Memuat sesi autentikasi Grand Sundara Digital...
+      </div>
+    );
+  }
 
   if (!currentUser) {
-    return <Login onLogin={handleLogin} />;
+    return <Login />;
+  }
+
+  // If forcePasswordChange is true, mandate password change
+  if (currentUser.forcePasswordChange) {
+    return <ChangePasswordModal />;
+  }
+
+  // Route Guard: if account is invited or suspended, show notice
+  if (currentUser.accountStatus === 'invited' || currentUser.accountStatus === 'suspended') {
+    return <AccountStatusNotice />;
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900 selection:bg-emerald-100 selection:text-emerald-900">
       <Navbar
         currentUser={currentUser}
-        onSwitchUser={handleSwitchUserRole}
-        onLogout={handleLogout}
+        onSwitchUser={switchDemoRole}
+        onLogout={logout}
         onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
         onNavigateToSettings={() => setActivePage('settings')}
       />
@@ -80,7 +74,7 @@ export default function App() {
             <Dashboard currentUser={currentUser} onNavigate={setActivePage} />
           )}
           {activePage === 'families' && <FamilyResidents currentUser={currentUser} />}
-          {activePage === 'siteplan' && <Siteplan />}
+          {activePage === 'siteplan' && <Siteplan currentUser={currentUser} />}
           {activePage === 'cash' && <CashManagement currentUser={currentUser} />}
           {activePage === 'businesses' && <BusinessDirectory currentUser={currentUser} />}
           {(activePage === 'announcements' || activePage === 'events') && (
@@ -93,5 +87,13 @@ export default function App() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

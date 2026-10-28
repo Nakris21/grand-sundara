@@ -3,17 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  MOCK_FAMILIES,
-  MOCK_RESIDENTS,
-  MOCK_CASH_TRANSACTIONS,
-  MOCK_CASH_SETTINGS,
-  MOCK_ANNOUNCEMENTS,
-  MOCK_EVENTS,
-  MOCK_BUSINESS_LISTINGS,
-} from '../data/mockData';
-import { ActivePage, UserAccount } from '../types';
+  ActivePage,
+  UserAccount,
+  Family,
+  Resident,
+  CashTransaction,
+  Announcement,
+  EventItem,
+  BusinessListing,
+} from '../types';
+import {
+  getFamilies,
+  getResidents,
+  getCashTransactions,
+  getAnnouncements,
+  getEvents,
+  getBusinessListings,
+  getDataMode,
+} from '../services/dataAdapter';
+import { MOCK_CASH_SETTINGS } from '../data/mockData';
 import {
   Home,
   Users,
@@ -26,6 +36,7 @@ import {
   CheckCircle2,
   MapPin,
   ExternalLink,
+  Database,
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -34,22 +45,60 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onNavigate }) => {
-  // Calculate total balance
-  const totalIncome = MOCK_CASH_TRANSACTIONS.reduce((acc, t) => acc + t.amountIn, 0);
-  const totalExpense = MOCK_CASH_TRANSACTIONS.reduce((acc, t) => acc + t.amountOut, 0);
+  const [families, setFamilies] = useState<Family[]>([]);
+  const [residents, setResidents] = useState<Resident[]>([]);
+  const [transactions, setTransactions] = useState<CashTransaction[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [businesses, setBusinesses] = useState<BusinessListing[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const dataMode = getDataMode();
+
+  useEffect(() => {
+    async function loadDashboardData() {
+      setIsLoading(true);
+      try {
+        const [fams, resps, txs, anns, evs, bizs] = await Promise.all([
+          getFamilies(),
+          getResidents(),
+          getCashTransactions(),
+          getAnnouncements(),
+          getEvents(),
+          getBusinessListings(),
+        ]);
+        setFamilies(fams);
+        setResidents(resps);
+        setTransactions(txs);
+        setAnnouncements(anns);
+        setEvents(evs);
+        setBusinesses(bizs);
+      } catch (err) {
+        console.error('Error loading dashboard data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadDashboardData();
+  }, []);
+
+  const totalIncome = transactions.reduce((acc, t) => acc + t.amountIn, 0);
+  const totalExpense = transactions.reduce((acc, t) => acc + t.amountOut, 0);
   const currentBalance = MOCK_CASH_SETTINGS.openingBalance + totalIncome - totalExpense;
 
-  const publishedAnnouncements = MOCK_ANNOUNCEMENTS.filter((a) => a.status === 'published');
-  const upcomingEvents = MOCK_EVENTS.filter((e) => e.status === 'published');
-  const approvedBusinesses = MOCK_BUSINESS_LISTINGS.filter((b) => b.status === 'approved');
+  const publishedAnnouncements = announcements.filter((a) => a.status === 'published');
+  const upcomingEvents = events.filter((e) => e.status === 'published');
+  const approvedBusinesses = businesses.filter((b) => b.status === 'approved');
 
   return (
     <div className="space-y-6">
-      {/* Banner Data Contoh */}
-      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start space-x-3 text-amber-900 shadow-xs">
-        <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-        <div className="text-xs sm:text-sm">
-          <span className="font-bold">Informasi Data Contoh:</span> Anda sedang melihat portal <strong className="font-semibold">Grand Sundara Digital</strong> menggunakan <em>Data Contoh</em> warga Perumahan Grand Sundara Dukuhturi. Belum tersimpan di database produksi Firebase sebelum integrasi diaktifkan.
+      {/* Banner Storage Mode */}
+      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center justify-between text-emerald-900 shadow-xs">
+        <div className="flex items-center space-x-3">
+          <Database className="w-5 h-5 text-emerald-600 shrink-0" />
+          <div className="text-xs sm:text-sm">
+            <span>Mode Penyimpanan Aktif:</span> <strong className="uppercase font-bold text-emerald-950">{dataMode} Storage</strong> (Data tersimpan secara permanen sesuai mode yang aktif).
+          </div>
         </div>
       </div>
 
@@ -96,12 +145,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onNavigate })
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
               <Home className="w-5 h-5" />
             </div>
-            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-              Data Contoh
+            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full uppercase">
+              {dataMode}
             </span>
           </div>
           <div className="mt-4">
-            <div className="text-2xl font-bold text-gray-900">{MOCK_FAMILIES.length} Rumah</div>
+            <div className="text-2xl font-bold text-gray-900">{families.length} Rumah</div>
             <p className="text-xs text-gray-500 mt-0.5">Keluarga terdaftar</p>
           </div>
         </div>
@@ -114,12 +163,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onNavigate })
             <div className="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center group-hover:bg-green-600 group-hover:text-white transition-colors">
               <Users className="w-5 h-5" />
             </div>
-            <span className="text-xs font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
-              Data Contoh
+            <span className="text-xs font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded-full uppercase">
+              {dataMode}
             </span>
           </div>
           <div className="mt-4">
-            <div className="text-2xl font-bold text-gray-900">{MOCK_RESIDENTS.length} Warga</div>
+            <div className="text-2xl font-bold text-gray-900">{residents.length} Warga</div>
             <p className="text-xs text-gray-500 mt-0.5">Anggota keluarga aktif</p>
           </div>
         </div>
@@ -165,7 +214,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onNavigate })
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Announcements & Events */}
         <div className="lg:col-span-2 space-y-6">
           {/* Announcements */}
           <div className="bg-white rounded-2xl border border-emerald-100 p-6 shadow-xs">
@@ -184,21 +232,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onNavigate })
             </div>
 
             <div className="space-y-4">
-              {publishedAnnouncements.map((ann) => (
-                <div
-                  key={ann.id}
-                  className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-100 hover:bg-emerald-50 transition-colors"
-                >
-                  <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                    <span className="font-semibold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
-                      Pengumuman Resmi
-                    </span>
-                    <span>{new Date(ann.createdAt).toLocaleDateString('id-ID', { dateStyle: 'medium' })}</span>
+              {publishedAnnouncements.length === 0 ? (
+                <p className="text-xs text-gray-400 italic">Belum ada pengumuman.</p>
+              ) : (
+                publishedAnnouncements.slice(0, 2).map((ann) => (
+                  <div
+                    key={ann.id}
+                    className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-100 hover:bg-emerald-50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                      <span className="font-semibold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                        Pengumuman Resmi
+                      </span>
+                      <span>{new Date(ann.createdAt).toLocaleDateString('id-ID', { dateStyle: 'medium' })}</span>
+                    </div>
+                    <h3 className="font-bold text-gray-900 text-sm sm:text-base mb-1">{ann.title}</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">{ann.body}</p>
                   </div>
-                  <h3 className="font-bold text-gray-900 text-sm sm:text-base mb-1">{ann.title}</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">{ann.body}</p>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
@@ -219,41 +271,45 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onNavigate })
             </div>
 
             <div className="space-y-3">
-              {upcomingEvents.map((ev) => (
-                <div
-                  key={ev.id}
-                  className="p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-emerald-300 transition-colors"
-                >
-                  <div className="space-y-1">
-                    <div className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded inline-block">
-                      {new Date(ev.eventDate).toLocaleDateString('id-ID', {
-                        weekday: 'long',
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })}
+              {upcomingEvents.length === 0 ? (
+                <p className="text-xs text-gray-400 italic">Belum ada agenda kegiatan.</p>
+              ) : (
+                upcomingEvents.slice(0, 2).map((ev) => (
+                  <div
+                    key={ev.id}
+                    className="p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-emerald-300 transition-colors"
+                  >
+                    <div className="space-y-1">
+                      <div className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded inline-block">
+                        {new Date(ev.eventDate).toLocaleDateString('id-ID', {
+                          weekday: 'long',
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                        })}
+                      </div>
+                      <h3 className="font-bold text-gray-900 text-sm">{ev.title}</h3>
+                      <p className="text-xs text-gray-500">{ev.location}</p>
                     </div>
-                    <h3 className="font-bold text-gray-900 text-sm">{ev.title}</h3>
-                    <p className="text-xs text-gray-500">{ev.location}</p>
+                    {ev.instagramUrl && (
+                      <a
+                        href={ev.instagramUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center space-x-1.5 px-3 py-1.5 bg-pink-50 hover:bg-pink-100 text-pink-700 rounded-lg text-xs font-semibold transition-colors shrink-0"
+                      >
+                        <span>Dokumentasi IG</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
                   </div>
-                  {ev.instagramUrl && (
-                    <a
-                      href={ev.instagramUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center space-x-1.5 px-3 py-1.5 bg-pink-50 hover:bg-pink-100 text-pink-700 rounded-lg text-xs font-semibold transition-colors shrink-0"
-                    >
-                      <span>Dokumentasi IG</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  )}
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
 
-        {/* Right Col: Quick Links & Summary */}
+        {/* Right Col */}
         <div className="space-y-6">
           <div className="bg-white rounded-2xl border border-emerald-100 p-6 shadow-xs">
             <h2 className="text-base font-bold text-gray-900 mb-4 flex items-center space-x-2">

@@ -5,12 +5,17 @@
 
 import React, { useState } from 'react';
 import { MOCK_FAMILIES, MOCK_RESIDENTS } from '../data/mockData';
-import { Family } from '../types';
-import { MapPin, Home, Users, Info, CheckCircle2 } from 'lucide-react';
+import { Family, UserAccount } from '../types';
+import { MapPin, Home, Users, Info, CheckCircle2, Upload, AlertCircle } from 'lucide-react';
 
-export const Siteplan: React.FC = () => {
+interface SiteplanProps {
+  currentUser?: UserAccount;
+}
+
+export const Siteplan: React.FC<SiteplanProps> = ({ currentUser }) => {
   const [selectedBlock, setSelectedBlock] = useState<string>('All');
   const [activeFamily, setActiveFamily] = useState<Family | null>(MOCK_FAMILIES[0]);
+  const [siteplanImage, setSiteplanImage] = useState<string | null>(null);
 
   const blocks = ['All', 'A', 'B', 'C', 'D'];
 
@@ -22,16 +27,66 @@ export const Siteplan: React.FC = () => {
     ? MOCK_RESIDENTS.filter((r) => r.familyId === activeFamily.id)
     : [];
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        setSiteplanImage(uploadEvent.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center space-x-2">
           <MapPin className="w-6 h-6 text-emerald-600" />
-          <span>Siteplan Perumahan Grand Sundara Dukuhturi</span>
+          <span>Siteplan Grand Sundara Dukuhturi</span>
         </h1>
         <p className="text-xs sm:text-sm text-gray-500 mt-1">
-          Peta interaktif blok dan rumah warga. Klik salah satu rumah untuk melihat detail informasi keluarga.
+          Peta interaktif kavling rumah dan warga perumahan. Klik salah satu rumah untuk melihat detail keluarga.
         </p>
+      </div>
+
+      {/* Notice on Storage / Image configuration */}
+      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-start space-x-3 text-emerald-900 shadow-xs">
+        <Info className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+        <div className="text-xs sm:text-sm space-y-1">
+          <span className="font-bold">Informasi Siteplan & Penyimpanan:</span> Anda dapat mengunggah gambar denah siteplan fisik perumahan di bawah ini untuk preview lokal, atau menggunakan grid kavling interaktif.
+          {(currentUser?.role === 'super_admin' || currentUser?.role === 'admin') && (
+            <div className="pt-2">
+              <label className="inline-flex items-center space-x-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold cursor-pointer shadow-xs transition-colors">
+                <Upload className="w-3.5 h-3.5" />
+                <span>Unggah Gambar Siteplan Baru</span>
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+              </label>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Siteplan Image Display / Placeholder */}
+      <div className="bg-white rounded-2xl border border-emerald-100 p-6 shadow-xs space-y-4">
+        <h2 className="font-bold text-gray-900 text-sm sm:text-base flex items-center space-x-2 border-b border-gray-100 pb-3">
+          <MapPin className="w-5 h-5 text-emerald-600" />
+          <span>Denah Visual Perumahan</span>
+        </h2>
+
+        {siteplanImage ? (
+          <div className="relative rounded-xl overflow-hidden border border-emerald-200 bg-gray-50 max-h-96 flex items-center justify-center">
+            <img src={siteplanImage} alt="Siteplan Perumahan" className="max-h-96 w-auto object-contain" />
+          </div>
+        ) : (
+          <div className="rounded-2xl border-2 border-dashed border-emerald-200 bg-emerald-50/50 p-8 text-center space-y-2">
+            <MapPin className="w-10 h-10 text-emerald-600 mx-auto opacity-60" />
+            <p className="text-sm font-semibold text-gray-800">Gambar siteplan belum diunggah</p>
+            <p className="text-xs text-gray-500 max-w-md mx-auto">
+              Gunakan grid kavling interaktif di bawah ini untuk menavigasi data keluarga per rumah secara presisi.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Block Filter */}
@@ -52,17 +107,17 @@ export const Siteplan: React.FC = () => {
         ))}
       </div>
 
-      {/* Siteplan Grid & Details Layout */}
+      {/* Grid & Details Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Cols: House Map Cards */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-emerald-100 p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">
             <h2 className="font-bold text-gray-900 text-sm sm:text-base flex items-center space-x-2">
               <Home className="w-5 h-5 text-emerald-600" />
-              <span>Denah Kavling & Rumah Warga</span>
+              <span>Daftar Kavling & Rumah Warga</span>
             </h2>
             <span className="text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full font-semibold">
-              Interaktif
+              Terhubung ke Data Keluarga
             </span>
           </div>
 
