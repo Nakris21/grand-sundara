@@ -1,0 +1,1325 @@
+{
+  "document_info": {
+    "title": "PRD dan FRD Grand Sundara Digital",
+    "version": "1.0",
+    "status": "Draft final untuk dasar pengembangan MVP",
+    "language": "id-ID",
+    "last_updated": "2026-10-28",
+    "project_owner": "Paguyuban Warga Perumahan Grand Sundara Dukuhturi",
+    "purpose": "Dokumen kebutuhan produk dan fungsional sebagai acuan pembuatan aplikasi web responsif menggunakan Google AI Studio Build mode dan Firebase.",
+    "notes": [
+      "Dokumen ini menetapkan kebutuhan produk, bukan bukti bahwa aplikasi atau integrasi sudah dibangun dan diuji.",
+      "Google AI Studio digunakan untuk membantu menghasilkan dan memperbaiki kode. Konfigurasi Firebase, keamanan, deployment, dan pengujian tetap harus dilakukan.",
+      "Sebelum digunakan dengan data warga sebenarnya, aplikasi harus diuji menggunakan data contoh dan aturan akses harus ditinjau."
+    ]
+  },
+  "product_requirements_document": {
+    "product_name": "Grand Sundara Digital",
+    "product_summary": "Portal digital warga Perumahan Grand Sundara Dukuhturi untuk pengelolaan data keluarga dan warga, transparansi kas paguyuban, informasi kegiatan, direktori usaha warga, dan pengembangan fitur AI secara bertahap.",
+    "problem_statement": [
+      "Data keluarga dan warga perlu tersusun berdasarkan rumah/keluarga agar mudah diperbarui oleh pengelola.",
+      "Informasi kas paguyuban perlu dicatat secara konsisten dan dapat dilihat oleh warga terverifikasi.",
+      "Informasi kegiatan dan dokumentasi perlu dikumpulkan dalam satu portal tanpa membebani penyimpanan dengan unggahan foto berulang.",
+      "Usaha milik warga perlu memiliki direktori sederhana agar mudah ditemukan oleh tetangga.",
+      "Pengelolaan informasi dan pembuatan materi komunikasi dapat dibantu AI, tetapi keputusan dan perubahan data penting tetap berada pada manusia yang berwenang."
+    ],
+    "vision": "Mewujudkan portal warga yang sederhana, aman, transparan, dan mendorong gotong royong, guyub rukun, serta seduluran di lingkungan Grand Sundara.",
+    "goals": [
+      "Menyediakan satu sumber data keluarga dan warga yang terstruktur.",
+      "Memungkinkan pengelola melihat dan mengelola data rumah melalui siteplan interaktif.",
+      "Menyediakan pencatatan kas masuk dan keluar beserta saldo yang dapat diperiksa warga terverifikasi.",
+      "Memusatkan pengumuman dan agenda kegiatan.",
+      "Membantu promosi usaha warga melalui direktori yang mudah dicari.",
+      "Menyiapkan fondasi yang aman untuk asisten AI dan analisis sederhana."
+    ],
+    "success_metrics": [
+      {
+        "metric": "Kelengkapan data rumah",
+        "target": "Admin dapat mencatat seluruh rumah yang masuk dalam cakupan paguyuban; persentase kelengkapan dapat dipantau."
+      },
+      {
+        "metric": "Akurasi saldo kas",
+        "target": "Saldo yang ditampilkan sama dengan saldo awal ditambah seluruh pemasukan dikurangi seluruh pengeluaran yang valid."
+      },
+      {
+        "metric": "Keterlacakan transaksi",
+        "target": "Setiap perubahan transaksi memiliki catatan siapa, kapan, dan perubahan apa yang dilakukan."
+      },
+      {
+        "metric": "Akses berbasis peran",
+        "target": "Akun warga tidak dapat melakukan operasi khusus admin/bendahara melalui antarmuka maupun permintaan langsung ke backend/database."
+      },
+      {
+        "metric": "Penggunaan dokumentasi",
+        "target": "Tautan Instagram dapat disimpan; jika embed gagal, tautan alternatif tetap tersedia."
+      }
+    ],
+    "target_users": [
+      {
+        "role": "Super Admin",
+        "needs": [
+          "Mengelola konfigurasi dan akun admin",
+          "Mengatur data rumah",
+          "Memverifikasi akun",
+          "Mengawasi audit log"
+        ]
+      },
+      {
+        "role": "Admin Paguyuban",
+        "needs": [
+          "Mengelola data keluarga/warga sesuai kewenangan",
+          "Mengelola pengumuman dan kegiatan",
+          "Memoderasi direktori usaha"
+        ]
+      },
+      {
+        "role": "Bendahara",
+        "needs": [
+          "Mencatat pemasukan dan pengeluaran",
+          "Melihat laporan kas",
+          "Mengoreksi transaksi dengan jejak audit"
+        ]
+      },
+      {
+        "role": "Warga Terverifikasi",
+        "needs": [
+          "Melihat informasi yang diizinkan",
+          "Mengelola profil sendiri sesuai kebijakan",
+          "Melihat kas",
+          "Melihat kegiatan dan direktori usaha"
+        ]
+      }
+    ],
+    "platform_and_architecture": {
+      "delivery": "Responsive web application",
+      "development_tool": "Google AI Studio Build mode",
+      "frontend": {
+        "technology": "React + TypeScript",
+        "requirements": [
+          "Tampilan responsif untuk ponsel dan desktop",
+          "Navigasi sederhana",
+          "Form memiliki validasi dan pesan kesalahan yang jelas",
+          "Status loading, berhasil, dan gagal ditampilkan dengan konsisten"
+        ]
+      },
+      "backend_and_data": {
+        "authentication": "Firebase Authentication",
+        "database": "Cloud Firestore",
+        "server_side_operations": "Node.js runtime/server-side functions yang didukung deployment pilihan; operasi sensitif dan pemanggilan Gemini tidak boleh mengandalkan rahasia di browser.",
+        "file_storage": "Tidak diperlukan untuk dokumentasi Instagram pada MVP. Firebase Storage hanya ditambahkan bila kelak ada kebutuhan file internal yang jelas.",
+        "ai": "Gemini API melalui server-side endpoint yang aman; API key tidak boleh ditanam di kode frontend."
+      },
+      "technical_constraints": [
+        "Firestore adalah database dokumen, bukan SQL. Relasi keluarga_id diterapkan sebagai ID referensi dan integritasnya harus dijaga oleh validasi server dan aturan akses.",
+        "AI Studio membantu menghasilkan kode tetapi tidak otomatis menjamin keamanan, kebenaran logika, atau kesiapan produksi.",
+        "Sebelum publikasi, lakukan pengujian aturan Firestore, autentikasi, otorisasi, validasi input, dan pemulihan data.",
+        "Jangan menggunakan data NIK, nomor KK, foto dokumen identitas, atau data sensitif yang tidak diperlukan."
+      ]
+    },
+    "scope": {
+      "mvp_included": [
+        "Login dan akses berdasarkan peran",
+        "Pendaftaran warga melalui undangan admin",
+        "Pengelolaan data rumah/keluarga dan anggota keluarga",
+        "Siteplan dengan area rumah yang dapat diklik dan ditautkan ke data rumah",
+        "Profil warga dengan data minimal dan pengaturan privasi",
+        "Direktori usaha warga",
+        "Pencatatan kas masuk dan keluar serta laporan saldo",
+        "Pengumuman dan agenda kegiatan",
+        "Tautan dokumentasi Instagram dengan pratinjau jika memungkinkan",
+        "Audit log untuk operasi penting",
+        "Dasbor ringkas sesuai peran"
+      ],
+      "post_mvp": [
+        "Asisten AI untuk menjawab pertanyaan dari informasi resmi yang tersedia di aplikasi",
+        "AI untuk membantu membuat draf pengumuman dan promosi usaha",
+        "Analisis ringkasan kas berbasis transaksi yang tersedia",
+        "Ekspor laporan ke CSV atau XLSX jika dibutuhkan",
+        "Fitur partisipasi atau konfirmasi kehadiran kegiatan jika disetujui"
+      ],
+      "out_of_scope": [
+        "Aplikasi native Android/iOS",
+        "Pembayaran online dan integrasi rekening bank",
+        "Marketplace dengan keranjang, checkout, dan pembayaran",
+        "Penyimpanan foto kegiatan secara massal",
+        "Penyimpanan NIK, nomor KK, atau foto dokumen kependudukan",
+        "AI yang mengubah, menghapus, atau menyetujui transaksi secara otomatis",
+        "Prediksi keuangan otomatis sebelum data cukup dan metodenya tervalidasi"
+      ]
+    },
+    "product_decisions": [
+      {
+        "topic": "Pendaftaran akun",
+        "decision": "Akun warga dibuat melalui undangan admin yang memiliki masa berlaku dan hanya dapat digunakan satu kali."
+      },
+      {
+        "topic": "Struktur data keluarga",
+        "decision": "Pisahkan entitas keluarga/rumah dan warga. Satu keluarga memiliki banyak warga; setiap warga memiliki hubungan keluarga."
+      },
+      {
+        "topic": "Kepala keluarga",
+        "decision": "Setiap keluarga aktif harus memiliki tepat satu warga yang ditandai sebagai Kepala Keluarga. Perubahan harus divalidasi."
+      },
+      {
+        "topic": "Privasi warga",
+        "decision": "Data hanya tersedia bagi akun terverifikasi sesuai peran dan persetujuan. Nomor HP bersifat opsional dan tidak otomatis terlihat oleh semua warga."
+      },
+      {
+        "topic": "Kas",
+        "decision": "Tidak ada data rekening. Kas berisi tanggal, jenis transaksi, rincian, jumlah masuk, jumlah keluar, saldo setelah transaksi, keterangan opsional, dan pencatat."
+      },
+      {
+        "topic": "Dokumentasi foto",
+        "decision": "Simpan URL postingan Instagram. Pratinjau bersifat opsional; sediakan tautan keluar jika embed tidak tersedia."
+      },
+      {
+        "topic": "AI",
+        "decision": "Dibangun bertahap. MVP fokus pada modul inti; AI assistant dan bantuan penulisan menjadi tahap lanjutan, diikuti analisis kas."
+      }
+    ]
+  },
+  "functional_requirements_document": {
+    "roles_and_permissions": {
+      "roles": [
+        "super_admin",
+        "admin",
+        "bendahara",
+        "resident"
+      ],
+      "rules": [
+        {
+          "role": "super_admin",
+          "permissions": [
+            "Mengelola akun admin dan peran",
+            "Mengelola data rumah dan keluarga",
+            "Memverifikasi warga",
+            "Melihat dan mengelola seluruh modul",
+            "Melihat audit log"
+          ]
+        },
+        {
+          "role": "admin",
+          "permissions": [
+            "Mengelola data rumah, keluarga, dan warga sesuai penugasan",
+            "Mengundang dan memverifikasi warga",
+            "Mengelola pengumuman dan kegiatan",
+            "Memoderasi direktori usaha",
+            "Melihat kas dan laporan"
+          ]
+        },
+        {
+          "role": "bendahara",
+          "permissions": [
+            "Membuat transaksi pemasukan/pengeluaran",
+            "Memperbarui transaksi melalui proses yang tercatat",
+            "Melihat laporan dan saldo kas",
+            "Tidak dapat mengubah peran atau aturan akses"
+          ]
+        },
+        {
+          "role": "resident",
+          "permissions": [
+            "Melihat informasi yang tersedia bagi warga terverifikasi",
+            "Mengubah profil milik sendiri pada kolom yang diizinkan",
+            "Mengelola usaha milik sendiri untuk diajukan atau diperbarui",
+            "Melihat seluruh transaksi kas yang telah dipublikasikan",
+            "Tidak dapat membuat atau mengubah transaksi kas",
+            "Tidak dapat melihat data pribadi warga lain yang dibatasi"
+          ]
+        }
+      ],
+      "enforcement": "Semua izin wajib ditegakkan pada backend/database rules, bukan hanya menyembunyikan tombol di frontend."
+    },
+    "data_model": {
+      "families": {
+        "description": "Data keluarga sekaligus identitas rumah dalam lingkungan perumahan.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "required": true,
+            "purpose": "ID unik keluarga/rumah"
+          },
+          {
+            "name": "block",
+            "type": "string",
+            "required": true,
+            "purpose": "Blok rumah, misalnya C2"
+          },
+          {
+            "name": "house_number",
+            "type": "string",
+            "required": true,
+            "purpose": "Nomor rumah"
+          },
+          {
+            "name": "address_note",
+            "type": "string",
+            "required": false,
+            "purpose": "Catatan alamat tambahan"
+          },
+          {
+            "name": "siteplan_region_id",
+            "type": "string",
+            "required": false,
+            "purpose": "ID area klik pada gambar siteplan"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "required": true,
+            "allowed_values": [
+              "active",
+              "inactive"
+            ],
+            "purpose": "Status rumah/keluarga"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp",
+            "required": true
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp",
+            "required": true
+          }
+        ],
+        "constraints": [
+          "Kombinasi blok dan nomor rumah harus unik.",
+          "Data keluarga tidak boleh dihapus permanen jika masih memiliki riwayat transaksi atau keterkaitan penting; gunakan status nonaktif jika diperlukan."
+        ]
+      },
+      "residents": {
+        "description": "Data orang yang menjadi anggota suatu keluarga.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "required": true,
+            "purpose": "ID unik warga"
+          },
+          {
+            "name": "family_id",
+            "type": "string",
+            "required": true,
+            "purpose": "Referensi ke families.id"
+          },
+          {
+            "name": "full_name",
+            "type": "string",
+            "required": true,
+            "purpose": "Nama lengkap"
+          },
+          {
+            "name": "birth_place",
+            "type": "string",
+            "required": false,
+            "purpose": "Tempat lahir"
+          },
+          {
+            "name": "birth_date",
+            "type": "date",
+            "required": false,
+            "purpose": "Tanggal lahir"
+          },
+          {
+            "name": "occupation",
+            "type": "string",
+            "required": false,
+            "purpose": "Pekerjaan"
+          },
+          {
+            "name": "phone_number",
+            "type": "string",
+            "required": false,
+            "purpose": "Nomor HP opsional"
+          },
+          {
+            "name": "family_relationship",
+            "type": "string",
+            "required": true,
+            "allowed_values": [
+              "Kepala Keluarga",
+              "Suami",
+              "Istri",
+              "Anak",
+              "Ayah",
+              "Ibu",
+              "Cucu",
+              "Menantu",
+              "Mertua",
+              "Saudara",
+              "Famili Lainnya"
+            ],
+            "purpose": "Hubungan warga dengan Kepala Keluarga"
+          },
+          {
+            "name": "linked_user_id",
+            "type": "string",
+            "required": false,
+            "purpose": "Referensi akun login jika warga memiliki akun"
+          },
+          {
+            "name": "profile_visibility",
+            "type": "object",
+            "required": true,
+            "purpose": "Preferensi tampilan data yang boleh dibagikan"
+          },
+          {
+            "name": "verification_status",
+            "type": "string",
+            "required": true,
+            "allowed_values": [
+              "pending",
+              "verified",
+              "rejected"
+            ],
+            "purpose": "Status verifikasi"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp",
+            "required": true
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp",
+            "required": true
+          }
+        ],
+        "constraints": [
+          "family_id harus mengacu ke keluarga yang ada.",
+          "Setiap keluarga aktif harus memiliki tepat satu anggota dengan family_relationship = Kepala Keluarga.",
+          "Satu akun login hanya boleh terhubung dengan profil warga yang diizinkan; aturan penghubungan harus diverifikasi admin.",
+          "Nomor HP tidak wajib dan tidak boleh dipublikasikan tanpa dasar izin yang jelas."
+        ]
+      },
+      "user_accounts": {
+        "description": "Profil otorisasi aplikasi yang terkait dengan Firebase Authentication.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "required": true,
+            "purpose": "UID dari Firebase Authentication"
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "required": true,
+            "allowed_values": [
+              "super_admin",
+              "admin",
+              "bendahara",
+              "resident"
+            ]
+          },
+          {
+            "name": "resident_id",
+            "type": "string",
+            "required": false,
+            "purpose": "Referensi ke profil warga"
+          },
+          {
+            "name": "account_status",
+            "type": "string",
+            "required": true,
+            "allowed_values": [
+              "invited",
+              "active",
+              "suspended"
+            ]
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp",
+            "required": true
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp",
+            "required": true
+          }
+        ]
+      },
+      "invitations": {
+        "description": "Undangan pendaftaran akun yang dikelola admin.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "target_contact",
+            "type": "string",
+            "required": true,
+            "purpose": "Email atau kontak tujuan sesuai metode undangan"
+          },
+          {
+            "name": "family_id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "resident_id",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "token_hash",
+            "type": "string",
+            "required": true,
+            "purpose": "Hash token undangan, bukan token mentah"
+          },
+          {
+            "name": "expires_at",
+            "type": "timestamp",
+            "required": true
+          },
+          {
+            "name": "used_at",
+            "type": "timestamp",
+            "required": false
+          },
+          {
+            "name": "created_by",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "required": true,
+            "allowed_values": [
+              "active",
+              "used",
+              "expired",
+              "revoked"
+            ]
+          }
+        ],
+        "constraints": [
+          "Undangan hanya dapat digunakan sekali.",
+          "Undangan memiliki masa berlaku.",
+          "Token mentah tidak disimpan di database."
+        ]
+      },
+      "cash_transactions": {
+        "description": "Pencatatan kas paguyuban tanpa rekening bank.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "transaction_date",
+            "type": "date",
+            "required": true
+          },
+          {
+            "name": "transaction_type",
+            "type": "string",
+            "required": true,
+            "allowed_values": [
+              "income",
+              "expense"
+            ]
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "required": true,
+            "purpose": "Rincian transaksi"
+          },
+          {
+            "name": "amount_in",
+            "type": "number",
+            "required": true,
+            "purpose": "Jumlah pemasukan; isi 0 jika bukan pemasukan"
+          },
+          {
+            "name": "amount_out",
+            "type": "number",
+            "required": true,
+            "purpose": "Jumlah pengeluaran; isi 0 jika bukan pengeluaran"
+          },
+          {
+            "name": "balance_after",
+            "type": "number",
+            "required": true,
+            "purpose": "Saldo setelah transaksi"
+          },
+          {
+            "name": "note",
+            "type": "string",
+            "required": false,
+            "purpose": "Keterangan opsional"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "required": true,
+            "allowed_values": [
+              "published",
+              "voided"
+            ],
+            "purpose": "Status transaksi"
+          },
+          {
+            "name": "created_by",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp",
+            "required": true
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp",
+            "required": true
+          }
+        ],
+        "constraints": [
+          "Nominal tidak boleh negatif.",
+          "Untuk jenis income, amount_in harus lebih besar dari nol dan amount_out harus 0.",
+          "Untuk jenis expense, amount_out harus lebih besar dari nol dan amount_in harus 0.",
+          "Saldo dihitung dari saldo awal yang ditetapkan dan urutan transaksi valid.",
+          "Perubahan atau pembatalan transaksi harus dicatat dalam audit log; tidak boleh menghapus riwayat secara diam-diam.",
+          "Akses untuk membuat dan mengubah transaksi dibatasi kepada bendahara, admin yang diberi kewenangan, dan super_admin."
+        ]
+      },
+      "cash_settings": {
+        "description": "Pengaturan sederhana kas.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "opening_balance",
+            "type": "number",
+            "required": true,
+            "purpose": "Saldo awal pada tanggal mulai pencatatan"
+          },
+          {
+            "name": "opening_balance_date",
+            "type": "date",
+            "required": true
+          },
+          {
+            "name": "updated_by",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp",
+            "required": true
+          }
+        ]
+      },
+      "business_listings": {
+        "description": "Direktori usaha warga, bukan marketplace.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "owner_resident_id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "business_name",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "category",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "whatsapp_number",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "social_url",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "required": true,
+            "allowed_values": [
+              "pending",
+              "approved",
+              "rejected",
+              "inactive"
+            ]
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp",
+            "required": true
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp",
+            "required": true
+          }
+        ],
+        "constraints": [
+          "Warga hanya dapat mengajukan dan mengubah listing miliknya sendiri.",
+          "Listing baru harus disetujui admin sebelum terlihat oleh seluruh warga.",
+          "Kontak hanya ditampilkan sesuai pengaturan dan persetujuan pemilik usaha."
+        ]
+      },
+      "announcements": {
+        "description": "Pengumuman paguyuban.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "title",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "body",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "published_at",
+            "type": "timestamp",
+            "required": false
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "required": true,
+            "allowed_values": [
+              "draft",
+              "published",
+              "archived"
+            ]
+          },
+          {
+            "name": "created_by",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp",
+            "required": true
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp",
+            "required": true
+          }
+        ]
+      },
+      "events": {
+        "description": "Agenda kegiatan warga.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "title",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "event_date",
+            "type": "timestamp",
+            "required": true
+          },
+          {
+            "name": "location",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "instagram_url",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "required": true,
+            "allowed_values": [
+              "draft",
+              "published",
+              "completed",
+              "cancelled"
+            ]
+          },
+          {
+            "name": "created_by",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp",
+            "required": true
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp",
+            "required": true
+          }
+        ],
+        "constraints": [
+          "URL Instagram harus divalidasi sebagai URL yang valid.",
+          "Pratinjau Instagram tidak dijamin selalu tersedia; selalu sediakan tautan untuk membuka postingan asli."
+        ]
+      },
+      "siteplan_regions": {
+        "description": "Pemetaan area klik pada gambar siteplan.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "family_id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "shape_data",
+            "type": "object",
+            "required": true,
+            "purpose": "Koordinat poligon atau area klik yang dinormalisasi terhadap gambar"
+          },
+          {
+            "name": "updated_by",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp",
+            "required": true
+          }
+        ],
+        "constraints": [
+          "Area klik harus merujuk ke ID keluarga, bukan hanya nama atau nomor yang ditulis di gambar.",
+          "Perubahan posisi area klik tidak boleh mengubah ID keluarga.",
+          "Jika gambar siteplan belum tersedia, modul harus tetap dapat digunakan dalam bentuk daftar rumah sampai gambar ditambahkan."
+        ]
+      },
+      "audit_logs": {
+        "description": "Catatan operasi penting dan perubahan data.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "actor_user_id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "action",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "entity_type",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "entity_id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "changed_fields_summary",
+            "type": "object",
+            "required": false
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp",
+            "required": true
+          }
+        ],
+        "constraints": [
+          "Audit log tidak dapat diubah atau dihapus oleh akun warga biasa.",
+          "Hindari menyalin data pribadi sensitif ke log."
+        ]
+      },
+      "ai_interactions": {
+        "description": "Opsional untuk mencatat interaksi AI tanpa menyimpan data sensitif yang tidak diperlukan.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "user_id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "feature",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "prompt_summary",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "response_summary",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp",
+            "required": true
+          }
+        ],
+        "constraints": [
+          "Jangan menyimpan isi percakapan yang memuat data sensitif tanpa kebutuhan dan pemberitahuan yang jelas."
+        ]
+      }
+    },
+    "functional_modules": [
+      {
+        "id": "FR-01",
+        "name": "Autentikasi dan pengelolaan akun",
+        "priority": "MVP",
+        "requirements": [
+          "Pengguna dapat login dan logout.",
+          "Admin dapat mengundang warga dengan undangan sekali pakai dan masa berlaku.",
+          "Akun baru tidak memperoleh akses ke data warga sampai proses verifikasi selesai.",
+          "Peran pengguna ditentukan dari data otorisasi yang tidak dapat diubah sendiri oleh pengguna.",
+          "Akun yang ditangguhkan tidak dapat mengakses modul terlindungi."
+        ],
+        "acceptance_criteria": [
+          "Undangan kedaluwarsa atau yang sudah digunakan tidak dapat digunakan kembali.",
+          "Pengguna tidak dapat menaikkan perannya dengan mengubah data dari browser.",
+          "Pengguna belum terverifikasi tidak dapat membuka data internal warga."
+        ]
+      },
+      {
+        "id": "FR-02",
+        "name": "Data keluarga dan warga",
+        "priority": "MVP",
+        "requirements": [
+          "Admin dapat membuat, melihat, memperbarui, dan menonaktifkan data keluarga/rumah.",
+          "Admin dapat menambahkan banyak anggota ke satu keluarga.",
+          "Setiap anggota terhubung ke keluarga melalui family_id.",
+          "Form anggota berisi nama, tempat lahir, tanggal lahir, pekerjaan, nomor HP opsional, dan hubungan keluarga.",
+          "Hubungan keluarga mencakup Kepala Keluarga, suami, istri, anak, ayah, ibu, cucu, menantu, mertua, saudara, dan famili lainnya.",
+          "Sistem memvalidasi bahwa setiap keluarga aktif memiliki tepat satu Kepala Keluarga.",
+          "Warga hanya dapat memperbarui kolom profil sendiri yang diizinkan; perubahan penting dapat menunggu persetujuan admin.",
+          "Data pribadi warga tidak ditampilkan kepada semua akun secara otomatis."
+        ],
+        "acceptance_criteria": [
+          "Satu keluarga dapat memiliki beberapa anggota.",
+          "Sistem menolak keluarga aktif dengan dua Kepala Keluarga atau tanpa Kepala Keluarga.",
+          "Sistem menolak anggota yang mengacu pada family_id yang tidak ada.",
+          "Nomor HP boleh kosong.",
+          "Akun warga tidak dapat mengubah data profil warga lain tanpa kewenangan."
+        ]
+      },
+      {
+        "id": "FR-03",
+        "name": "Siteplan interaktif",
+        "priority": "MVP",
+        "requirements": [
+          "Aplikasi menampilkan gambar siteplan jika aset gambar tersedia.",
+          "Admin dapat mengaitkan area rumah pada siteplan dengan data keluarga.",
+          "Pengguna dapat memilih area rumah untuk membuka informasi yang sesuai dengan hak aksesnya.",
+          "Admin dapat memperbarui area klik tanpa membuat ulang data keluarga.",
+          "Jika siteplan belum tersedia, data rumah tetap dapat dikelola melalui daftar."
+        ],
+        "acceptance_criteria": [
+          "Area rumah membuka keluarga yang benar berdasarkan ID.",
+          "Area klik tetap terkait ke keluarga yang sama setelah posisi diperbarui.",
+          "Pengguna yang tidak berwenang tidak melihat detail pribadi dari area rumah."
+        ]
+      },
+      {
+        "id": "FR-04",
+        "name": "Kas paguyuban",
+        "priority": "MVP",
+        "requirements": [
+          "Bendahara/admin berwenang dapat menetapkan saldo awal dan tanggal mulai pencatatan.",
+          "Pengguna berwenang dapat menambah transaksi dengan tanggal, jenis, rincian, nominal masuk atau keluar, dan keterangan opsional.",
+          "Sistem menghitung dan menampilkan saldo berjalan.",
+          "Warga terverifikasi dapat melihat transaksi yang dipublikasikan, total pemasukan, total pengeluaran, dan saldo.",
+          "Sistem menyediakan filter periode dan jenis transaksi.",
+          "Koreksi atau pembatalan transaksi harus tercatat di audit log.",
+          "Ekspor CSV/XLSX dapat ditambahkan setelah MVP jika diperlukan."
+        ],
+        "acceptance_criteria": [
+          "Nominal tidak boleh negatif.",
+          "Transaksi pemasukan tidak dapat sekaligus memiliki nilai pengeluaran positif, begitu juga sebaliknya.",
+          "Saldo akhir sama dengan saldo awal ditambah pemasukan dikurangi pengeluaran.",
+          "Warga biasa tidak dapat membuat, memperbarui, atau membatalkan transaksi.",
+          "Perubahan transaksi memiliki jejak audit."
+        ]
+      },
+      {
+        "id": "FR-05",
+        "name": "Direktori usaha warga",
+        "priority": "MVP",
+        "requirements": [
+          "Warga terverifikasi dapat mengajukan profil usaha.",
+          "Profil memuat nama usaha, kategori, deskripsi opsional, kontak WhatsApp opsional, dan tautan media sosial opsional.",
+          "Admin dapat menyetujui, menolak, atau menonaktifkan listing.",
+          "Warga dapat mencari dan menyaring usaha berdasarkan nama atau kategori.",
+          "Kontak pemilik hanya ditampilkan sesuai persetujuan/pengaturan privasi."
+        ],
+        "acceptance_criteria": [
+          "Listing berstatus pending atau rejected tidak tampil di direktori publik internal.",
+          "Warga tidak dapat mengubah listing milik warga lain.",
+          "Tautan kontak yang tersedia dibuka dengan aman."
+        ]
+      },
+      {
+        "id": "FR-06",
+        "name": "Pengumuman dan agenda",
+        "priority": "MVP",
+        "requirements": [
+          "Admin dapat membuat, memperbarui, menerbitkan, dan mengarsipkan pengumuman.",
+          "Admin dapat membuat agenda dengan judul, tanggal, lokasi, deskripsi, dan tautan Instagram opsional.",
+          "Warga terverifikasi dapat melihat pengumuman terbit dan agenda yang relevan.",
+          "Agenda dapat ditandai selesai atau dibatalkan."
+        ],
+        "acceptance_criteria": [
+          "Pengumuman draft tidak terlihat bagi warga biasa.",
+          "Agenda menampilkan tanggal dan status yang benar.",
+          "Perubahan agenda tercermin setelah data disimpan."
+        ]
+      },
+      {
+        "id": "FR-07",
+        "name": "Dokumentasi Instagram",
+        "priority": "MVP",
+        "requirements": [
+          "Admin dapat memasukkan URL postingan Instagram untuk kegiatan.",
+          "Aplikasi mencoba menampilkan pratinjau jika didukung oleh platform dan cara implementasinya.",
+          "Aplikasi menyediakan tautan untuk membuka postingan asli jika pratinjau tidak tersedia.",
+          "Aplikasi tidak mengunduh atau menyimpan ulang foto Instagram secara otomatis."
+        ],
+        "acceptance_criteria": [
+          "URL tidak valid ditolak dengan pesan yang jelas.",
+          "Jika embed gagal, halaman tetap berfungsi dan tautan postingan tersedia.",
+          "Tidak ada kebutuhan Firebase Storage untuk foto Instagram pada MVP."
+        ]
+      },
+      {
+        "id": "FR-08",
+        "name": "Dasbor dan pencarian",
+        "priority": "MVP",
+        "requirements": [
+          "Dasbor menampilkan menu sesuai peran.",
+          "Dasbor admin menampilkan ringkasan rumah, warga, pengumuman, dan kas sesuai izin.",
+          "Dasbor warga menampilkan pengumuman, agenda, ringkasan kas, dan direktori usaha.",
+          "Pencarian data warga dibatasi sesuai izin akses."
+        ],
+        "acceptance_criteria": [
+          "Menu yang tidak diizinkan tidak ditampilkan, dan endpoint/database tetap menolak akses langsung.",
+          "Ringkasan dashboard konsisten dengan data sumber."
+        ]
+      },
+      {
+        "id": "FR-09",
+        "name": "Audit log",
+        "priority": "MVP",
+        "requirements": [
+          "Sistem mencatat operasi penting seperti perubahan peran, perubahan data keluarga/warga, transaksi kas, dan moderasi listing.",
+          "Log mencatat pelaku, waktu, jenis tindakan, dan entitas terkait.",
+          "Akun warga tidak dapat mengubah log."
+        ],
+        "acceptance_criteria": [
+          "Perubahan transaksi dan perubahan peran menghasilkan audit log.",
+          "Audit log tidak dapat diubah oleh pengguna tanpa kewenangan."
+        ]
+      },
+      {
+        "id": "FR-10",
+        "name": "Asisten AI dan bantuan penulisan",
+        "priority": "Post-MVP",
+        "requirements": [
+          "Asisten menjawab pertanyaan berdasarkan informasi yang diizinkan dari aplikasi dan sumber yang telah disetujui.",
+          "Asisten menyatakan jika informasi tidak tersedia, bukan mengarang jawaban.",
+          "AI dapat membantu membuat draf pengumuman dan promosi usaha.",
+          "Draf AI harus ditinjau dan disetujui manusia sebelum diterbitkan.",
+          "AI tidak boleh mengubah data keluarga, peran akun, atau transaksi kas secara langsung.",
+          "Pemanggilan Gemini API dilakukan di sisi server dan API key tidak dikirim ke browser."
+        ],
+        "acceptance_criteria": [
+          "Asisten tidak dapat menjawab dengan data yang tidak boleh diakses oleh pengguna.",
+          "Jawaban yang tidak memiliki sumber memadai menyatakan keterbatasannya.",
+          "AI hanya menghasilkan draf dan tidak menerbitkan konten otomatis."
+        ]
+      },
+      {
+        "id": "FR-11",
+        "name": "Analisis kas berbantuan AI",
+        "priority": "Post-MVP",
+        "requirements": [
+          "AI dapat merangkum pemasukan, pengeluaran, dan perubahan saldo pada periode yang dipilih.",
+          "Hasil analisis menyebutkan periode dan data yang digunakan.",
+          "AI membedakan fakta hitungan dari interpretasi atau saran.",
+          "Prediksi tidak dibuat sebelum jumlah dan kualitas data memadai."
+        ],
+        "acceptance_criteria": [
+          "Angka dalam ringkasan cocok dengan hasil perhitungan sistem.",
+          "AI tidak menjadi sumber utama perhitungan saldo; perhitungan deterministik tetap dilakukan aplikasi.",
+          "Hasil analisis dapat ditinjau manusia."
+        ]
+      }
+    ],
+    "non_functional_requirements": [
+      {
+        "id": "NFR-01",
+        "name": "Keamanan",
+        "requirements": [
+          "Gunakan Firebase Authentication dan aturan Firestore yang membatasi akses berdasarkan UID, peran, status verifikasi, dan kepemilikan data.",
+          "Jangan mengandalkan validasi frontend sebagai satu-satunya pengamanan.",
+          "Simpan rahasia/API key hanya di lingkungan server yang sesuai.",
+          "Batasi operasi administratif dan catat perubahan penting."
+        ]
+      },
+      {
+        "id": "NFR-02",
+        "name": "Privasi",
+        "requirements": [
+          "Kumpulkan hanya data yang diperlukan.",
+          "Jangan mengumpulkan NIK, nomor KK, atau foto dokumen identitas pada MVP.",
+          "Nomor HP bersifat opsional dan visibilitasnya dibatasi.",
+          "Berikan informasi kepada warga mengenai data yang ditampilkan dan siapa yang dapat melihatnya."
+        ]
+      },
+      {
+        "id": "NFR-03",
+        "name": "Kemudahan penggunaan",
+        "requirements": [
+          "Bahasa antarmuka menggunakan Bahasa Indonesia sederhana.",
+          "Form memiliki label jelas, validasi, dan pesan kesalahan yang dapat dipahami.",
+          "Tampilan nyaman digunakan pada layar ponsel."
+        ]
+      },
+      {
+        "id": "NFR-04",
+        "name": "Keandalan data",
+        "requirements": [
+          "Operasi yang memperbarui saldo dan transaksi harus konsisten, idealnya menggunakan transaksi/batch Firestore atau operasi server yang tervalidasi.",
+          "Sediakan cara pencadangan dan pemulihan data sebelum digunakan secara operasional.",
+          "Tampilkan status simpan berhasil hanya setelah server/database mengonfirmasi keberhasilan."
+        ]
+      },
+      {
+        "id": "NFR-05",
+        "name": "Kinerja dan penyimpanan",
+        "requirements": [
+          "Gunakan pagination atau pembatasan hasil untuk daftar besar.",
+          "Foto Instagram tidak diunduh dan disimpan ulang pada MVP.",
+          "Hindari memuat seluruh data warga sekaligus pada perangkat."
+        ]
+      }
+    ],
+    "core_user_flows": [
+      {
+        "name": "Admin mengundang warga",
+        "steps": [
+          "Admin memilih keluarga/rumah.",
+          "Admin membuat undangan untuk warga yang sesuai.",
+          "Sistem menghasilkan undangan sekali pakai dengan masa berlaku.",
+          "Warga menyelesaikan autentikasi dan melengkapi profil.",
+          "Admin memverifikasi hubungan akun dengan profil warga.",
+          "Sistem memberikan akses sesuai peran."
+        ]
+      },
+      {
+        "name": "Admin mengelola keluarga",
+        "steps": [
+          "Admin membuka daftar rumah atau siteplan.",
+          "Admin memilih atau membuat data keluarga.",
+          "Admin menambahkan anggota keluarga.",
+          "Sistem memvalidasi family_id dan status Kepala Keluarga.",
+          "Sistem menyimpan perubahan dan mencatat audit log."
+        ]
+      },
+      {
+        "name": "Bendahara mencatat kas",
+        "steps": [
+          "Bendahara membuka modul kas.",
+          "Bendahara memilih tanggal dan jenis transaksi.",
+          "Bendahara mengisi rincian dan nominal masuk atau keluar.",
+          "Sistem memvalidasi nominal dan menghitung saldo.",
+          "Sistem menyimpan transaksi dan audit log.",
+          "Warga terverifikasi dapat melihat transaksi yang dipublikasikan."
+        ]
+      },
+      {
+        "name": "Admin menambahkan dokumentasi Instagram",
+        "steps": [
+          "Admin membuka agenda kegiatan.",
+          "Admin memasukkan URL postingan Instagram.",
+          "Sistem memvalidasi URL.",
+          "Sistem menampilkan pratinjau jika tersedia dan selalu menyediakan tautan ke postingan asli."
+        ]
+      }
+    ],
+    "acceptance_test_plan": [
+      {
+        "id": "AT-01",
+        "test": "Akses warga belum terverifikasi",
+        "expected_result": "Tidak dapat mengakses data internal warga dan kas terlindungi."
+      },
+      {
+        "id": "AT-02",
+        "test": "Relasi anggota keluarga",
+        "expected_result": "Anggota tersimpan dengan family_id valid dan tampil pada keluarga yang benar."
+      },
+      {
+        "id": "AT-03",
+        "test": "Validasi Kepala Keluarga",
+        "expected_result": "Sistem menolak keluarga aktif yang tidak memiliki tepat satu Kepala Keluarga."
+      },
+      {
+        "id": "AT-04",
+        "test": "Privasi nomor HP",
+        "expected_result": "Nomor HP tidak ditampilkan kepada pengguna yang tidak memiliki izin."
+      },
+      {
+        "id": "AT-05",
+        "test": "Saldo kas",
+        "expected_result": "Saldo awal + pemasukan - pengeluaran sama dengan saldo akhir."
+      },
+      {
+        "id": "AT-06",
+        "test": "Warga mencoba mengubah transaksi",
+        "expected_result": "Permintaan ditolak pada aturan backend/database, meskipun dikirim tanpa melalui UI."
+      },
+      {
+        "id": "AT-07",
+        "test": "Jejak audit",
+        "expected_result": "Perubahan transaksi dan peran memiliki catatan pelaku dan waktu."
+      },
+      {
+        "id": "AT-08",
+        "test": "Listing usaha menunggu moderasi",
+        "expected_result": "Listing pending tidak muncul bagi semua warga."
+      },
+      {
+        "id": "AT-09",
+        "test": "Tautan Instagram gagal di-embed",
+        "expected_result": "Halaman tetap berjalan dan tautan membuka postingan asli."
+      },
+      {
+        "id": "AT-10",
+        "test": "API key AI",
+        "expected_result": "API key tidak dapat ditemukan pada bundle frontend atau permintaan browser."
+      }
+    ],
+    "implementation_phases": [
+      {
+        "phase": 1,
+        "name": "Fondasi",
+        "deliverables": [
+          "Kerangka UI responsif",
+          "Firebase Authentication",
+          "Struktur peran dan aturan akses awal",
+          "Data keluarga dan warga dengan data contoh",
+          "Pengujian akses dasar"
+        ]
+      },
+      {
+        "phase": 2,
+        "name": "Siteplan dan direktori",
+        "deliverables": [
+          "Daftar rumah dan keluarga",
+          "Siteplan interaktif bila gambar tersedia",
+          "Direktori usaha warga dan moderasi"
+        ]
+      },
+      {
+        "phase": 3,
+        "name": "Kas dan informasi kegiatan",
+        "deliverables": [
+          "Saldo awal, transaksi masuk/keluar, dan saldo berjalan",
+          "Laporan kas yang dapat dilihat warga terverifikasi",
+          "Pengumuman dan agenda",
+          "Tautan Instagram dengan fallback"
+        ]
+      },
+      {
+        "phase": 4,
+        "name": "Pengerasan keamanan dan uji coba",
+        "deliverables": [
+          "Audit log",
+          "Pengujian aturan Firestore dan peran",
+          "Pengujian dengan akun uji berbeda peran",
+          "Pencadangan dan prosedur pemulihan",
+          "Uji coba terbatas sebelum memakai data nyata"
+        ]
+      },
+      {
+        "phase": 5,
+        "name": "AI pasca-MVP",
+        "deliverables": [
+          "Asisten informasi dengan pembatasan sumber dan hak akses",
+          "Bantuan draf pengumuman dan promosi usaha",
+          "Analisis kas berbasis angka hasil perhitungan sistem"
+        ]
+      }
+    ],
+    "open_items_before_production": [
+      "Menentukan apakah gambar siteplan sudah tersedia dan siapa yang menyiapkan area klik.",
+      "Menentukan apakah data awal rumah/warga dimasukkan manual atau diimpor dari spreadsheet yang sudah diperiksa.",
+      "Menentukan metode undangan yang akan digunakan pada MVP, misalnya email atau kode undangan yang diberikan admin.",
+      "Menetapkan kebijakan visibilitas setiap kolom profil warga.",
+      "Menetapkan saldo awal kas dan tanggal mulai pencatatan.",
+      "Memeriksa biaya dan batas penggunaan Firebase sesuai perkiraan jumlah warga serta aktivitas aplikasi.",
+      "Menentukan domain dan layanan hosting/deployment.",
+      "Meninjau aturan privasi dan keamanan sebelum menggunakan data nyata."
+    ]
+  }
+}

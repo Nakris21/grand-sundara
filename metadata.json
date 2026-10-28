@@ -1,0 +1,6 @@
+{
+  "name": "Grand Sundara Digital",
+  "description": "Portal warga Perumahan Grand Sundara Dukuhturi untuk data keluarga, kas paguyuban, direktori usaha, dan kegiatan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
